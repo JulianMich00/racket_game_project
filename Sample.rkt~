@@ -32,7 +32,7 @@
     (set! i (+ i 1))
     (set! y (- y 10))
     ))
-;define fuck you
+;
 ;(define (jump)
 ;  (cond
 ;    (#t (set! y (- y 10)) (sleep 0.1) (set! y (- y 10)) (set! x (+ x 10)) (sleep 0.1) (set! y (+ y 10)) (set! x (+ x 10)) (sleep 0.1) (set! y (+ y 10)))))
