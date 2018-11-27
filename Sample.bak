@@ -20,7 +20,7 @@
     (set! i (+ i 1))
     (set! y (+ y 10))
     ))
-;; THESE ARE SOME COMMENTSDASDSDDD
+
 (define (funcDown)
   (define i 0)
   (for ([z 20])
