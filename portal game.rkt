@@ -9,29 +9,79 @@
 (define x 500)
 (define y 240)
 (define line_positions_x '())
+(define falling 0)
+
+(define base_positions_x (for/list ([i (in-range 250 750)]) i))
+(define wall_positions_x '(750))
+
+(define base_positions_y '(240))
+(define wall_positions_y '(240))
+
+(define (binary-search lst elem)
+  (define mid (floor (/ (length lst) 2)))
+  (define midelem (list-ref lst mid))
+  
+  (if (null? lst)
+     #f
+     (cond
+       ((and (= (length lst) 1) (not (equal? (first lst) elem))) #f)
+       ((= midelem elem) #t)
+       ((> midelem elem) (binary-search (take lst mid) elem))
+       ((< midelem elem) (binary-search (drop lst mid) elem))
+       (else #f)
+     )
+   )
+)
+
+(define (double-binary-search-bases)
+  (cond
+    [(and (binary-search base_positions_x x) (binary-search base_positions_y y)) #t]
+    [#t #f]))
+
+(define (double-binary-search-walls type)
+  (cond
+    [(and (binary-search wall_positions_x (type x 10)) (binary-search wall_positions_y y)) #t]
+    [#t #f]))
+
 (define angle 0)
+
 (define bullet (circle 5 "solid" "blue"))
 (define firestate 0)
 (define bulletx 1000)
 (define bullety 1000)
+
 (define move
   (λ (w key)
     (cond
       [(key=? key "w") (set! angle (- angle 1))]
       [(key=? key "s") (set! angle (+ angle 1))]
-      [(key=? key "a") (set! x (- x 10))]
-      [(key=? key "d") (set! x (+ x 10))]
-      [(key=? key " ") (set! bulletx 510) (set! bullety 240) (if (= firestate 0) (set! firestate 1) (set! firestate 0))])))
+      [(key=? key " ") (set! bulletx 510) (set! bullety 240) (if (= firestate 0) (set! firestate 1) (set! firestate 0))]
+      [#t
+      (cond
+        [(= falling 0) 
+         (cond
+           [(and (equal? (double-binary-search-walls +) #f) (key=? key "d")) (set! x (+ x 10))]
+           [(and (equal? (double-binary-search-walls -) #f) (key=? key "a")) (set! x (- x 10))])
+         ]
+        )
+      ]
+      )
+    )
+  )
 
-(define gun (ellipse 60 20 "solid" "red"))
-(define background (overlay (line HEIGHT 0 "black") (rectangle HEIGHT WIDTH "solid" "white")))
+(define gun (ellipse 30 8 "solid" "red"))
+(define background (overlay (line 500 0 "black") (rectangle HEIGHT WIDTH "solid" "white")))
 (define imagelist (list (overlay gun (bitmap icons/b-run.png))))
 (define coordinatelist (list (make-posn x (- y 10))))
 ;;list of coord on tick add new and delete the last one
 (define change
   (λ (t)
    
-    (set! imagelist (list (overlay (rotate angle gun) (bitmap icons/b-run.png)) bullet)) 
+    (set! imagelist (list (overlay (rotate angle gun) (bitmap icons/b-run.png)) bullet))
+    (cond
+      [(equal? (double-binary-search-bases) #f) (set! y (+ y 1)) (set! falling 1)]
+      [#t (set! falling 0)]
+      )
     (set! coordinatelist (list (make-posn x y) (make-posn bulletx bullety)))
     (set! bulletx (+ bulletx (* (tan (/ (* pi angle) 180)) 5)))
     (set! bullety (+ bullety 5))
