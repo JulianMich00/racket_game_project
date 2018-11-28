@@ -27,7 +27,7 @@
 (define change
   (λ (t)
     (displayln angle)
-    (set! imagelist (list (overlay (rotate angle gun) (bitmap icons/b-run.png))))
+    (set! gun (rotate angle gun))
     (set! coordinatelist (list (make-posn x y)))
     (image 1)))
     
