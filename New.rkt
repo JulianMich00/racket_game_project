@@ -35,7 +35,6 @@
     (set! x (+ x xspeed))
     (set! xspeed (* xspeed xacceleration))
     (set! y (+ y yspeed))
-<<<<<<< HEAD
     (set! yspeed (* yspeed yacceleration))
     (if (= randomspawn 0) (set! coordinatelist (list (make-posn x y)))
         [cond [(and (> 250 x) (> 250 y)) (set! x (random 50 175))(set! y (random 325 450))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100))(set! randomspawn 0)]
@@ -52,12 +51,7 @@
               [(and (< 250 x) (< 250 y)) (set! x (random 325 450))(set! y (random 50 175))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100))(set! randomspawn 0)]
               [(and (> 250 x) (< 250 y)) (set! x (random 325 450))(set! y (random 325 450))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100))(set! randomspawn 0)]] (set! spawndelay (- spawndelay 1)))
     (image 1)))
-
-=======
-    (set! yspeed (+ yspeed yacceleration))
-    (if (= randomspawn 0) (set! coordinatelist (list (make-posn x y))) (change_helper))
-    (if (and (> x 225) (< x 235)) (change_helper2) (set! spawndelay (- spawndelay 1)))
-    (image 1)))
+    
 
 (define (change_helper)
   (set! randomspawn 0)
@@ -71,7 +65,6 @@
   (set! y ystart)
   (set! randomspawn 1))
 
->>>>>>> 3a046085b7069765177db0c896129822a1ad8a2e
 (define image
   (λ (t)
      (place-images imagelist

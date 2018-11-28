@@ -70,7 +70,9 @@
   )
 
 (define gun (ellipse 30 8 "solid" "red"))
-(define background (overlay (line 500 0 "black") (rectangle HEIGHT WIDTH "solid" "white")))
+(define background (place-images (list (line 500 0 "black") (line 0 100 "black"))
+  (list (make-posn 500 250) (make-posn 750 200))
+  (rectangle HEIGHT WIDTH "solid" "white")))
 (define imagelist (list (overlay gun (bitmap icons/b-run.png))))
 (define coordinatelist (list (make-posn x (- y 10))))
 ;;list of coord on tick add new and delete the last one
@@ -83,8 +85,9 @@
       [#t (set! falling 0)]
       )
     (set! coordinatelist (list (make-posn x y) (make-posn bulletx bullety)))
-    (set! bulletx (+ bulletx (* (tan (/ (* pi angle) 180)) 5)))
-    (set! bullety (+ bullety 5))
+    (set! bulletx (+ bulletx 5))
+    (set! bullety (+ bullety (* (* (tan (/ (* pi angle) 180)) 5) -1)))
+    (displayln angle)
     (image 1)))
     
 
