@@ -36,21 +36,16 @@
     (set! xspeed (+ xspeed xacceleration))
     (set! y (+ y yspeed))
     (set! yspeed (+ yspeed yacceleration))
-    (if (= randomspawn 0) (set! coordinatelist (list (make-posn x y))) (change_helper))
-    (if (and (> x 225) (< x 235)) (change_helper2) (set! spawndelay (- spawndelay 1)))
+    (if (= randomspawn 0) (set! coordinatelist (list (make-posn x y))) (cond (#t (set! randomspawn 0)(set! x (+ x (random 250 350)))(set! y (+ y (random 50 100)))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100)))))
+    (if (and (> x 225) (< x 235)) (cond (#t (set! x xstart) (set! y ystart) (set! randomspawn 1))) (set! spawndelay (- spawndelay 1)))
     (image 1)))
 
-(define (change_helper)
-  (set! randomspawn 0)
-  (set! x (+ x (random 250 350)))
-  (set! y (+ y (random 50 100)))
-  (set! xspeed (/ (- 250 x) 100))
-  (set! yspeed (/ (- 250 y) 100)))
-
-(define (change_helper2)
-  (set! x xstart)
-  (set! y ystart)
-  (set! randomspawn 1))
+(define move
+  (λ (w key)
+    (cond
+      
+      [(key=? key "a") (set! x (- x 10))]
+      [(key=? key "d") (set! x (+ x 10))])))
 
 (define image
   (λ (t)
@@ -59,5 +54,6 @@
                   background)))
 
 (big-bang 1
+  (on-key move)
   (on-tick change 0.01)
   (to-draw (λ (t) (image 1))))
