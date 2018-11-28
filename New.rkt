@@ -21,10 +21,10 @@
 
 (define x (bug-x firstbug))
 (define y (bug-y firstbug))
-(define xspeed (/ (- 250 x) 100))
-(define yspeed (/ (- 250 y) 100))
-(define xacceleration 0.025)
-(define yacceleration 0.025)
+(define xspeed (/ (- (/ HEIGHT 2) x) 100))
+(define yspeed (/ (- (/ WIDTH 2) y) 100))
+(define xacceleration 1.025)
+(define yacceleration 1.025)
 
 (define coordinatelist (list (make-posn x y)))
 (define spawndelay 200)
@@ -33,19 +33,24 @@
 (define change
   (λ (t)
     (set! x (+ x xspeed))
-    (set! xspeed (+ xspeed xacceleration))
+    (set! xspeed (* xspeed xacceleration))
     (set! y (+ y yspeed))
-    (set! yspeed (+ yspeed yacceleration))
-    (if (= randomspawn 0) (set! coordinatelist (list (make-posn x y))) (cond (#t (set! randomspawn 0)(set! x (+ x (random 250 350)))(set! y (+ y (random 50 100)))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100)))))
-    (if (and (> x 225) (< x 235)) (cond (#t (set! x xstart) (set! y ystart) (set! randomspawn 1))) (set! spawndelay (- spawndelay 1)))
+    (set! yspeed (* yspeed yacceleration))
+    (if (= randomspawn 0) (set! coordinatelist (list (make-posn x y)))
+        [cond [(and (> 250 x) (> 250 y)) (set! x (random 50 175))(set! y (random 325 450))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100))(set! randomspawn 0)]
+              [(and (< 250 x) (> 250 y)) (set! x (random 50 175))(set! y (random 50 175))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100))(set! randomspawn 0)]
+              [(and (< 250 x) (< 250 y)) (set! x (random 325 450))(set! y (random 50 175))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100))(set! randomspawn 0)]
+              [(and (> 250 x) (< 250 y)) (set! x (random 325 450))(set! y (random 325 450))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100))(set! randomspawn 0)]]
+        )
+    (if [or (and (and (> y 255) (< y 290)) (and (< 255 x) (> 290 x)))
+            (and (and (< 210 y) (> 245 y)) (and (< 255 x) (> 290 x)))
+            (and (and (> y 255) (< y 290)) (and (> x 210) (< x 245)))
+            (and (and (< 210 y) (> 245 y)) (and (> x 210) (< x 245)))]
+        [cond [(and (> 250 x) (> 250 y)) (set! x (random 50 175))(set! y (random 325 450))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100))(set! randomspawn 0)]
+              [(and (< 250 x) (> 250 y)) (set! x (random 50 175))(set! y (random 50 175))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100))(set! randomspawn 0)]
+              [(and (< 250 x) (< 250 y)) (set! x (random 325 450))(set! y (random 50 175))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100))(set! randomspawn 0)]
+              [(and (> 250 x) (< 250 y)) (set! x (random 325 450))(set! y (random 325 450))(set! xspeed (/ (- 250 x) 100))(set! yspeed (/ (- 250 y) 100))(set! randomspawn 0)]] (set! spawndelay (- spawndelay 1)))
     (image 1)))
-
-(define move
-  (λ (w key)
-    (cond
-      
-      [(key=? key "a") (set! x (- x 10))]
-      [(key=? key "d") (set! x (+ x 10))])))
 
 (define image
   (λ (t)
@@ -54,6 +59,5 @@
                   background)))
 
 (big-bang 1
-  (on-key move)
   (on-tick change 0.01)
   (to-draw (λ (t) (image 1))))
