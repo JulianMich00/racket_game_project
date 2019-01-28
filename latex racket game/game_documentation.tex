@@ -1,6 +1,7 @@
 \documentclass{article}
 \usepackage{graphicx}
 \graphicspath{ {./images/} }
+\usepackage{amsmath,amssymb,stackengine}
 \usepackage{tikz}
 \usepackage{listings}
 \usepackage{color}
@@ -133,7 +134,6 @@
 		\fill [black] (11.9,-26.1) -- (12.7,-26.6) -- (12.7,-25.6);
 		\end{tikzpicture}
 	\end{center}
-	\newpage
 	\textbf{Code Built from this FSM}
 	\begin{lstlisting}
 	(cond
@@ -203,7 +203,20 @@
 		\fill [black] (11.73,-26.82) -- (12.16,-27.66) -- (12.67,-26.8);
 		\end{tikzpicture}
 	\end{center}
-	\newpage
+	This FSM was created by reverse engineering the function that we had already created:
+	\begin{lstlisting}
+	(define (update-projectile angle x y direction)
+		(define s1 +)
+		(define s2 -)
+		(cond
+		 [(and (>= angle -90) (<= angle 90)) (set! s2 +)]
+		)
+		(if (= direction 1) (set! s1 -) #t)
+		(set! y (s2 y (* (* (tan (/ (* pi angle) 180)) 3) -1)))
+		(set! x (s1 x 3))
+		(list x y)
+	)
+	\end{lstlisting}
 	\subsection{EFSM's}
 	\textbf{Life reduction EFSM with movement and projectile movement:}
 	\begin{center}
@@ -229,26 +242,36 @@
 		\end{tikzpicture}
 	\end{center}
 	\subsection{Human Interface}
-	The color background that we have decided to use makes it very easy to distinguish between the walls and the background. The bullet color and the enemy color was chosen to be red as it is the most commonly used color for dangerous objects, so that the player instinctively understands that they should avoid the bullets without being told to.
-	\vspace{5mm}
-	The star in the interface is also a universal symbol for an object that should be collected. Otherwise player may not know whether or not to move towards it. \\
+	The color background that we have decided to use makes it very easy to distinguish between the walls and the background. The bullet color and the enemy color was chosen to be red as it is the most commonly used color for dangerous objects, so that the player instinctively understands that they should avoid the bullets without being told to. \\ \\
+	The star in the interface is also a universal symbol for an object that should be collected. Otherwise player may not know whether or not to move towards it.
 	The hearts are placed at the top of the screen to be easily visible by the player.
 	\newpage
 	\section{Implementation}
 	\subsection{Pre-conditions and Post-conditions}
-	Write your subsection text here.
+	\textbf{Length Function:}
+	\begin{align*}
+	&\text{\textbf{Precondition:}} &[x : list \land y = 0] \\
+	&\text{\textbf{Postcondition:}} &[y = z \land (x(z) \in x \land x(z + 1) \leftrightarrow \medskip'())] \\
+	\end{align*}
+	We use : to denote type of a variable. \\ \\
+	\textbf{Check Portal Touching Function:} \\
+	\begin{align*}
+	&\text{\textbf{Precondition:}} &[b-portal \neq \medskip '() \land length(\text{bx b-portal}) \geq 2 \\
+	&&\land \medskip length(\text{by b-portal}) \geq 2 \land x \neq \medskip '() \land y \neq \medskip '()] \\ \\
+	&\text{\textbf{Postcondition:}} &[y = z \land (x(z) \in x \land x(z + 1) \leftrightarrow \medskip'())]
+	\end{align*}
+	Where we use (attribute class) to denote class attributes for \\
+	specific instantiations of a class
 	\subsection{Side Effects}
 	The lifebarchange funcion not only changes the amount of hearts the player currently has, but also the bullet class field has-hit, this is an example of where side effects can be very useful, when trigger-checks are updated so that they cannot be triggered again.
 	\medskip
 	The change function alters almost all the classes in the program, as well as our hash-table that is used for the movement and portal gun rotation. \\
-	There are problems that come along with the change function have multiple side effects, such as the difficulty in locating problems in the code and what classes the issue is being created in.
-	
-	\newpage
+	There are problems that come along with the change function have multiple side effects, such as the difficulty in locating problems in the code and what classes the issue is being created in. \\
 	\section{Testing and Maintaining}
 	
 	\subsection{Test Cases and Assertions}
 	\begin{itemize}
-		\item {\large \textbf{test cases for movement}:} \\ \\
+		\item {\large \textbf{test cases for player movement}:} \\ \\
 			Pressing a while not in air and on platform that is $> 10$ pixels away from
 			either a drop or wall to the left of the players character will decrease the players
 			x position by $10$ pixels while y stays the same. \\ \\
@@ -259,7 +282,30 @@
 			x position by $10$ pixels while y stays the same. \\ \\
 			$x = x_0 + 10 \land y = y_0$ \\
 			
-			We then gather our test cases and assertions for \textbf{keyboard press a d}
+			We then gather our test cases and assertions for \textbf{keyboard press a d} \\ \\
+			\textbf{Test Cases:}
+			\begin{itemize}
+				\item \quad player-x = player-x + 10
+				\item \quad player-y = player-y
+				\item \quad player-x = player-x - 10
+			\end{itemize}
+			\textbf{Assertions:}
+			\begin{lstlisting}
+     		(test-begin
+			 (cond
+				[(and (= (send background check-walls (+ x 10) (+ y 16) 0))
+					  (and (not (= (send background check-bases (+ x 10) (+ y 16) 0)))
+						   (equal? animation "mD")))
+								(check-equal? x (+ x0 10))
+								(check-equal? y x0)]
+				[(and (= (send background check-walls (- x 10) (+ y 16) 0))
+					  (and (not (= (send background check-bases (- x 10) (+ y 16) 0)))
+						   (equal? animation "mA")))
+								(check-equal? x (- x0 10))
+								(check-equal? y x0)]
+				)
+			)
+			\end{lstlisting}
 			
 		\item {\large \textbf{test cases for teleporting through portals}:} \\ \\
 			if the player x position and y position match that of either a blue/orange portal
@@ -273,14 +319,58 @@
 			Here we use $O(y_t)$ and $O(y_b)$ to represent the top and bottom of the y positions of the Orange portal. \\
 			we also use $O(x_r)$ and $O(x_l)$ to represent the right and left x values of the Orange portal, we use the same logic for the Blue portal. \\
 			
-			We then gather our test cases and assertions for \textbf{portal teleporting}.
-		\newpage
+			We then gather our test cases and assertions for \textbf{portal teleporting}. \\ \\
+			\textbf{Test Cases:}
+			\begin{itemize}
+				\item \quad player-x = orange-portal-right-x + player-x - blue-portal-right-x
+				\item \quad player-y = orange-portal-top-y - 10
+				\item \quad player-y = orange-portal-bottom-y + 10
+				\item \quad player-x = orange-portal-right-x + 30
+				\item \quad player-y = orange-portal-top-y + player-y - blue-portal-top-y
+				\item \quad player-x = orange-portal-right-x - 30
+				\item \quad player-y = orange-portal-bottom-y + player-y - blue-portal-top-y
+			\end{itemize}
+			\textbf{Assertions:}
+			\begin{lstlisting}
+			(test-begin
+			 (cond
+				[(equal? (send b-portal get-direction) "d")
+					(check-equal? player-x 
+								  (+ o-portal-r-x (- player-x0 b-portal-r-x)))
+					(check-equal? player-y (- o-portal-y-t 10))]
+				[(equal? (send b-portal get-direction) "u")
+					(check-equal? player-x
+								  (+ o-portal-r-x (- player-x0 b-portal-r-x)))
+					(check-equal? player-y (+ o-portal-y-b 10))]
+				[(equal? (send b-portal get-direction) "l")
+					(check-equal? player-x (+ o-portal-r-x 30))
+					(check-equal? player-y 
+								  (+ o-portal-t-y 
+								  	 (- player-y0 b-portal-t-y)))]
+				[(equal? (send b-portal get-direction) "r")
+					(check-equal? player-x (- o-portal-r-x 30))
+					(check-equal? player-y 
+								  (+ o-portal-t-y 
+								  	 (- player-y0 b-portal-t-y)))]
+				)
+			)
+			\end{lstlisting}
+			And likewise for the blue portal and its assertions and test cases.
+
 		\item {\large \textbf{test cases enemy movement on platforms}:} \\ \\
 			When an enemy touches the end of a base platform it moves in the opposite direction \\ \\
 			$\iff$ \\ \\
 			When there is no platform to $x + (3 * speed)$ of the enemy's x position then it's direction is reversed. \\
 			
-			we then gather our test cases and assertions for \textbf{enemy movement}. \\
+			we then gather our test cases and assertions for \textbf{enemy movement}. \\ \\
+			\textbf{Test Cases:}
+			\begin{itemize}
+				\item \quad direction = (direction + 1) mod 2
+				\item \quad x = x + 1.5*speed
+				\item \quad x = x - 1.5*speed
+				\item \quad y = y + 2
+			\end{itemize}
+			\textbf{Assertions:}
 			\begin{lstlisting}
 			(test-begin
 			 (cond
@@ -295,7 +385,7 @@
 					(not (= (send background check-bases (- x (* 1.5 speed)) (+ y 16)) 0)))
 					(= direction 1))
 						(check-equal? direction (modulo (+ 1 direction0) 2))
-						(check-equal? x (+ x0 (* 1.5 speed)))]
+						(check-equal? x (- x0 (* 1.5 speed)))]
 				[(= (send background check-bases x (+ y 16)) 0)
 					(check-equal? y (+ y0 2))
 					(check-equal? falling 0)]
@@ -303,24 +393,50 @@
 			)
 			\end{lstlisting}
 	\subsection{Specification vs Implementation}
-	Write your subsection text here.
 	\end{itemize}
 	\subsection{User Feedback}
-	survey-link here
+	survey-link here: https://www.surveymonkey.co.uk/r/FDXDWKN \\ \\
+	Data collection and analysis below: \\
 	\begin{center}
-		\begin{tabular}{ |c|c|c| } 
+		\begin{tabular}{ |c|c|c|c| } 
 			\hline
-			Animations & Color Scheme and Design & Fun and Overall Playability \\ 
-			cell4 & cell5 & cell6 \\ 
-			cell7 & cell8 & cell9 \\ 
+			Controls & Look & Enjoyability & Design and Smoothness  \\ 
+			\hline
+			2.5/5 & 4/5 & 3/5 & 3/5\\ 
 			\hline
 		\end{tabular}
 	\end{center}
+	Ratings are an average of all surveys taken / 5 \\ \\
+	Amount of surveys taken: 15
 	
-	\subsection{Subsection Heading Here}
-	Interface requirements from survey results + fix.
+	\subsection{Amendments from the data}
+	\textbf{Controls:} \\ \\
+	Controls needed to be improved, we made adjustments to it by
+	first adding a section on the menu page labelled controls,
+	so that users could understand how the controls worked before actually entering the game,
+	we also spaced our the keys that needed to be pressed so that both hands could be used. \\ \\
+	\textbf{Look:} \\ \\
+	The look of the game was our best part so we decided to focus on other sections which were not as strong. \\ \\
+	\textbf{Enjoyability:} \\ \\
+	Enjoyability is always a difficult aspect of the game to increase, but by looking at which difficulty users preferred,
+	we could gather that the easy mode was the most enjoyable, meaning that we should tweak the other difficulties to be more like the easy mode. Thus we lowered the movement speed of enemies in the 2 other difficulties as well as increasing the time to get the stars. \\ \\
+	\textbf{Design and Smoothness:} \\ \\
+	To fix issues with lag we implemented binary searches instead of linear searches anywhere we could, this took down the lag by a small margin, but not a noticeable amount.
+	
+	\subsection{Updated User Feedback}
+	\begin{center}
+		\begin{tabular}{ |c|c|c|c| } 
+			\hline
+			Controls & Look & Enjoyability & Design and Smoothness  \\ 
+			\hline
+			3.5/5 & 4/5 & 3.5/5 & 3.5/5\\ 
+			\hline
+		\end{tabular}
+	\end{center}
+	Amount of surveys taken: 12 \\ \\
+	As we can clearly see, our adjustments did improve the ratings that we got, but they still were not that high unfortunately.
 	
 	\section{Conclusion}
-	Write your conclusion here.
+	We are happy with our end result, however we would have liked to add some additional features, and reduce the amount of bugs with the portal, however this was taking too much time to complete. Thus we decided to move on with other features of the program. 
 	
 \end{document}
